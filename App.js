@@ -1,21 +1,15 @@
-import React from 'react';
-import Main from './src/pages/main';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+import React from "react";
+import Routes from "./src/routes";
+import { NavigationContainer } from "@react-navigation/native";
+import { StatusBar } from "react-native";
 
 export default function App() {
   return (
-    <>
-    <StatusBar style="auto" />
-    <View style={styles.container}>
-        <Main />
-    </View>
-    </>
+    <NavigationContainer>
+      <StatusBar
+        backgroundColor="black"
+      />
+      <Routes />
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
