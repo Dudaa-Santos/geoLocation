@@ -9,7 +9,7 @@ import {
     ActivityIndicator
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
 
 export default class Cadastro extends Component {
     state = {
@@ -18,12 +18,12 @@ export default class Cadastro extends Component {
         cidade: "",
         endereco: "",
         numero: "",
-        loading: false
+        loading: false,
     };
-  
+
     handleCadastro = async () => {
         const { nome, estado, cidade, endereco, numero } = this.state;
-        
+
         if (!nome || !estado || !cidade || !endereco || !numero) {
             Alert.alert("Atenção", "Preencha todos os campos!");
             return;
@@ -33,9 +33,8 @@ export default class Cadastro extends Component {
 
         try {
             const enderecoCompleto = `${endereco}, ${numero}, ${cidade}`;
-            
             const locations = await Location.geocodeAsync(enderecoCompleto);
-            
+
             if (locations.length === 0) {
                 Alert.alert("Erro", "Não foi possível encontrar a localização do endereço informado.");
                 return;
@@ -43,18 +42,27 @@ export default class Cadastro extends Component {
 
             const { latitude, longitude } = locations[0];
 
-            const user = {
+            const newUser = {
                 nome,
                 estado,
                 cidade,
                 endereco,
                 numero,
                 latitude,
-                longitude
+                longitude,
             };
 
-            await AsyncStorage.setItem("user", JSON.stringify(user));
-            this.props.navigation.navigate("Main", { user });
+            // Recuperar a lista atual de usuários
+            const storedUsers = await AsyncStorage.getItem("users");
+            const users = storedUsers ? JSON.parse(storedUsers) : [];
+
+            // Adicionar o novo usuário
+            users.push(newUser);
+
+            // Salvar a lista atualizada no AsyncStorage
+            await AsyncStorage.setItem("users", JSON.stringify(users));
+
+            this.props.navigation.navigate("Main", { users });
         } catch (error) {
             Alert.alert("Erro", "Ocorreu um erro ao processar o endereço.");
             console.error(error);
@@ -62,12 +70,11 @@ export default class Cadastro extends Component {
             this.setState({ loading: false });
         }
     };
-  
+
     render() {
         return (
             <View style={styles.container}>
                 <Text style={styles.title}>CADASTRO</Text>
-                
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={styles.input}
@@ -77,7 +84,6 @@ export default class Cadastro extends Component {
                         onChangeText={(nome) => this.setState({ nome })}
                     />
                 </View>
-
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={styles.input}
@@ -87,7 +93,6 @@ export default class Cadastro extends Component {
                         onChangeText={(estado) => this.setState({ estado })}
                     />
                 </View>
-
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={styles.input}
@@ -97,7 +102,6 @@ export default class Cadastro extends Component {
                         onChangeText={(cidade) => this.setState({ cidade })}
                     />
                 </View>
-
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={styles.input}
@@ -107,20 +111,18 @@ export default class Cadastro extends Component {
                         onChangeText={(endereco) => this.setState({ endereco })}
                     />
                 </View>
-
-                <View style={styles.inputContainer}>    
+                <View style={styles.inputContainer}>
                     <TextInput
                         style={styles.input}
                         placeholder="Número"
                         placeholderTextColor="#000"
                         value={this.state.numero}
                         onChangeText={(numero) => this.setState({ numero })}
-                        keyboardType="number-pad"
                     />
                 </View>
 
-                <TouchableOpacity 
-                    style={styles.button} 
+                <TouchableOpacity
+                    style={styles.button}
                     onPress={this.handleCadastro}
                     disabled={this.state.loading}
                 >
@@ -129,6 +131,13 @@ export default class Cadastro extends Component {
                     ) : (
                         <Text style={styles.buttonText}>CADASTRAR</Text>
                     )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.button, { backgroundColor: "#007aff", borderColor: "#007aff" }]}
+                    onPress={() => this.props.navigation.navigate("Main")}
+                    disabled={this.state.loading}
+                >
+                    <Text style={styles.buttonText}>ENTRAR</Text>
                 </TouchableOpacity>
             </View>
         );
